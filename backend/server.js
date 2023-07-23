@@ -1,10 +1,36 @@
 const express = require("express");
 require("dotenv").config({ path: "config.env" });
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+
+// Route
+const userRoute = require("./routes/userRoute");
+// error middleware
+const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
 
-const port = process.env.PORT;
+// Middlewares
+// express.json() => analyse les demandes JSON entrantes et met les données analysées dans req.body
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+// dans la version recente de node en utilise app.use(express.json()) à la place de bodyparser.json()
+// app.use(bodyParser.json())
+// middleware pour conserver les cookies
+// app.use(cookieParser());
+
+// Routes Middleware
+// ces routes doivent etre en dessous des middleware express
+app.use("/api/users", userRoute);
+
+
+// Routes
+app.get("/", (req, res) => {
+  res.send(`hello word ${process.env.TEXT}`);
+});
+
+// errorHandler Should be the last middleware
+app.use(errorHandler);
 
 const connectDB = async () => {
   try {
@@ -16,6 +42,8 @@ const connectDB = async () => {
   }
 };
 
+const port = process.env.PORT;
+
 const startServer = async () => {
   try {
     await connectDB();
@@ -25,9 +53,3 @@ const startServer = async () => {
   }
 };
 startServer();
-
-app.get("/", (req, res) => {
-  res.send(`hello word ${process.env.TEXT}` );
-});
-
-
