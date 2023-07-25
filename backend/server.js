@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 // dans la version recente de node en utilise app.use(express.json()) à la place de bodyparser.json()
 // app.use(bodyParser.json())
 // middleware pour conserver les cookies
-// app.use(cookieParser());
+app.use(cookieParser());
 
 // Routes Middleware
 // ces routes doivent etre en dessous des middleware express

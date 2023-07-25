@@ -58,5 +58,14 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Fonction pour comparer le mot de passe entré avec le mot de passe haché enregistré
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  try {
+    return await bcrypt.compare(enteredPassword, this.password);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;
