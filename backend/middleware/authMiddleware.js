@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
 
+
 const protect = asyncHandler(async (req, res, next) => {
   try {
     // dans la fonction où il ya une definition des cookies si on tape
@@ -22,8 +23,9 @@ const protect = asyncHandler(async (req, res, next) => {
       res.status(401);
       throw new Error("User not found");
     }
-    // les données de l'utilisateur sont transmise à la fonction suivante lié a cette fonction
+    // les données de l'utilisateur seront transmises à la fonction suivante lié a cette fonction
     req.user = user;
+    // console.log(req.user)
     next();
   } catch (error) {
     res.status(401)
