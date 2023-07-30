@@ -8,6 +8,7 @@ const {
   getProductM2,
   deleteProductM1,
   deleteProductM2,
+  updateproduct
 } = require("../controllers/productController");
 const protect = require("../middleware/authMiddleware");
 const { upload } = require("../utils/fileUpload");
@@ -18,6 +19,9 @@ router.get("/M1/:id", protect, getProductM1);
 router.get("/M2/:id", protect, getProductM2);
 router.delete("/M1/:id", protect, deleteProductM1);
 router.delete("/M2/:id", protect, deleteProductM2);
+router.put("/:id", protect, upload.single("image"), updateproduct);
+router.patch("/:id", protect, upload.single("image"), updateproduct);
+
 
 
 module.exports = router;

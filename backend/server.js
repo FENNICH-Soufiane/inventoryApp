@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 // Route
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute")
+const contactRoute = require("./routes/contactRoute")
 // error middleware
 const errorHandler = require("./middleware/errorMiddleware");
 
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, "uploads")));
 // ces routes doivent etre en dessous des middleware express
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute)
+app.use("/api/contactus", contactRoute)
 
 
 // Routes

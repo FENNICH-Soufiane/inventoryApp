@@ -11,3 +11,6 @@
 #3. Create Email Sender Function<br>
 #4. Create Controller Function<br>
 
+#in update data
+#image: Object.keys(fileData).length === 0 ? product?.image : fileData
+
