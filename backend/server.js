@@ -4,11 +4,12 @@ const path = require("path");
 require("dotenv").config({ path: "config.env" });
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+const cors = require('cors');
 
 // Route
 const userRoute = require("./routes/userRoute");
-const productRoute = require("./routes/productRoute")
-const contactRoute = require("./routes/contactRoute")
+const productRoute = require("./routes/productRoute");
+const contactRoute = require("./routes/contactRoute");
 // error middleware
 const errorHandler = require("./middleware/errorMiddleware");
 
@@ -26,12 +27,14 @@ app.use(cookieParser());
 // Servir les fichiers statiques depuis le répertoire "public"
 app.use(express.static(path.join(__dirname, "uploads")));
 
+app.use(cors({ origin: ["http://localhost:3000"], credentials : true }));
+// app.use(cors());
+
 // Routes Middleware
 // ces routes doivent etre en dessous des middleware express
 app.use("/api/users", userRoute);
-app.use("/api/products", productRoute)
-app.use("/api/contactus", contactRoute)
-
+app.use("/api/products", productRoute);
+app.use("/api/contactus", contactRoute);
 
 // Routes
 app.get("/", (req, res) => {

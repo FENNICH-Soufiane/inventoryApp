@@ -10,8 +10,6 @@ const generateToken = require("../utils/generateToken");
 const cookie = require("../utils/cookie");
 const sendEmail = require("../utils/sendEmail");
 
-
-
 // @desc   Register User
 // @route  POST /api/users/register
 // @access Public
@@ -316,16 +314,16 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 
   // 5- verifier si un jeton de réinitialisation existe déjà pour cet utilisateur si oui on le supprime
-  const token = await Token.findOne({userId: user._id})
-  if(token) {
-    await token.deleteOne()
+  const token = await Token.findOne({ userId: user._id });
+  if (token) {
+    await token.deleteOne();
   }
 
   // 1- Create Reset Token
   let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
-  console.log(resetToken);// we use it for resetPassword , so we add it in params
+  console.log(resetToken); // we use it for resetPassword , so we add it in params
 
-   // 2- Hash token before saving to db
+  // 2- Hash token before saving to db
   const hashedToken = crypto
     .createHash("sha256")
     .update(resetToken)
@@ -352,8 +350,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   <p>X Team</p>`;
   const subject = "Password Reset Request";
   const sent_to = user.email;
-  const sent_from = `Dashboard ${process.env.EMAIL_USER}` // Dashboard is for label of email
-
+  const sent_from = `Dashboard ${process.env.EMAIL_USER}`; // Dashboard is for label of email
 
   try {
     await sendEmail(subject, message, sent_to, sent_from);
@@ -365,32 +362,38 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 // @desc    Reset password
-// @route   POST /api/users/resetpassword/:resetToken
+// @route   PUT /api/users/resetpassword/:resetToken
 // @access  Public
-const resetPassword = asyncHandler(async(req, res) => {
-  const {newPassword} = req.body;
-  const {resetToken} = req.params
+const resetPassword = asyncHandler(async (req, res) => {
+  
+    const { newPassword } = req.body;
+    const { resetToken } = req.params;
 
-  // Hash token before saving to db
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
+    // Hash token before saving to db
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-  // find token in DB
-  const userToken = await Token.findOne({token: hashedToken, expiresAt: {$gt: Date.now()}})
-  if(!userToken) {
-    res.status(404)
-    throw new Error("Invalid or Expired Token")
-  }
+    // find token in DB
+    const userToken = await Token.findOne({
+      token: hashedToken,
+      expiresAt: { $gt: Date.now() },
+    });
+    if (!userToken) {
+      res.status(404);
+      throw new Error("Invalid or Expired Token");
+    }
 
-  // find user
-  const user = await User.findOne({_id: userToken.userId})
-  user.password = newPassword
-  await user.save()
-  res.status(200).json({message: "Password Reset Successfully, Please Login"})
-
-})
+    // find user
+    const user = await User.findOne({ _id: userToken.userId });
+    user.password = newPassword;
+    await user.save();
+    res
+      .status(200)
+      .json({ message: "Password Reset Successfully, Please Login" });
+  
+});
 
 module.exports = {
   registerUser,
@@ -404,5 +407,5 @@ module.exports = {
   changePasswordMethodOne,
   changePasswordMethodTwoZ,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };
