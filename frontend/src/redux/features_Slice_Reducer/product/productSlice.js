@@ -31,7 +31,7 @@ export const createProduct = createAsyncThunk(
 );
 
 // Get all products
-export const getAllProducts = createAsyncThunk(
+export const getProducts = createAsyncThunk(
   "products/getAll",
   async (_, thunkAPI) => {
     try {
@@ -80,17 +80,17 @@ const productSlice = createSlice({
         toast.error(action.payload);
       })
       // reducers for get all Products ______________________
-      .addCase(getAllProducts.pending, (state) => {
+      .addCase(getProducts.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getAllProducts.fulfilled, (state, action) => {
+      .addCase(getProducts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
         console.log(action.payload);
         state.products = action.payload;
       })
-      .addCase(getAllProducts.rejected, (state, action) => {
+      .addCase(getProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
