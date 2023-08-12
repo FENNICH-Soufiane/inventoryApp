@@ -30,27 +30,67 @@ export const createProduct = createAsyncThunk(
   }
 );
 
+// Get all products
+export const getAllProducts = createAsyncThunk(
+  "products/getAll",
+  async (_, thunkAPI) => {
+    try {
+      return await productService.getProducts();
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(message);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product_",
   initialState,
   reducers: {
+    // il s'agit d'une action
     CALC_STORE_VALUE(state, action) {
       console.log("store value");
     },
   },
+  // il s'agit d'un reducer
   extraReducers: (builder) => {
     builder
+      // reducers for create Products ______________________
       .addCase(createProduct.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.isError = false;
         console.log(action.payload);
-        state.product.push(action.payload);
+        state.products.push(action.payload);
         toast.success("Product added successfully");
       })
       .addCase(createProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        toast.error(action.payload);
+      })
+      // reducers for get all Products ______________________
+      .addCase(getAllProducts.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getAllProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        console.log(action.payload);
+        state.products = action.payload;
+      })
+      .addCase(getAllProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
