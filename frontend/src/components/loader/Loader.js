@@ -19,12 +19,12 @@ const Loader = () => {
   );
 };
 
-// export const SpinnerImg = () => {
-//   return (
-//     <div className="--center-all">
-//       <img src={loaderImg} alt="Loading ..." />
-//     </div>
-//   );
-// };
+export const SpinnerImg = () => {
+  return (
+    <div className="--center-all">
+      <img src={loaderImg} alt="Loading ..." />
+    </div>
+  );
+};
 
 export default Loader;
