@@ -14,7 +14,7 @@ const initialState = {
   category: [],
 };
 
-// Create New product
+// Create New product (action)
 export const createProduct = createAsyncThunk(
   "products/create",
   async (formData, thunkAPI) => {
@@ -33,12 +33,71 @@ export const createProduct = createAsyncThunk(
   }
 );
 
-// Get all products
+// Get all products (action)
 export const getProducts = createAsyncThunk(
   "products/getAll",
   async (_, thunkAPI) => {
     try {
       return await productService.getProducts();
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(message);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Delete Product (action)
+export const deleteProducts = createAsyncThunk(
+  "products/delete",
+  async (id, thunkAPI) => {
+    try {
+      return await productService.deleteProduct_(id);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      // console.log(message);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+
+
+// Get a product (action)
+export const getProduct = createAsyncThunk(
+  "products/getProduct",
+  async (id, thunkAPI) => {
+    try {
+      return await productService.getProduct_(id);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(message);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Update Product (action)
+export const updateProduct = createAsyncThunk(
+  "products/updateProduct",
+  async ({id, formData}, thunkAPI) => {
+    try {
+      return await productService.updateProduct_(id, formData);
     } catch (error) {
       const message =
         (error.response &&
@@ -70,6 +129,32 @@ const productSlice = createSlice({
       }, 0);
       state.totalStoreValue = totalValue;
     },
+    CALC_OUTOFSTOCK(state, action) {
+      const products = action.payload;
+      const array = [];
+      products.map((item) => {
+        const { quantity } = item;
+        array.push(quantity);
+      });
+      // eslint-disable-next-line no-unused-vars
+      let count = 0;
+      array.forEach((number) => {
+        if (number === 0 || number === "0") {
+          count += 1;
+        }
+      });
+      state.outOfStock = count;
+    },
+    CALC_CATEGORY(state, action) {
+      const products = action.payload;
+      const array = [];
+      products.map((item) => {
+        const { category } = item;
+        return array.push(category);
+      });
+      const uniqueCategory = [...new Set(array)];
+      state.category = uniqueCategory.length;
+    },
   },
   // il s'agit d'un reducer
   extraReducers: (builder) => {
@@ -92,6 +177,40 @@ const productSlice = createSlice({
         state.message = action.payload;
         toast.error(action.payload);
       })
+      
+      // reducers for delete product
+      .addCase(deleteProducts.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        toast.success("Product deleted successfully");
+      })
+      .addCase(deleteProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        toast.error(action.payload);
+      })
+      
+      // reducers for Get product
+      .addCase(getProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.product = action.payload;
+      })
+      .addCase(getProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        toast.error(action.payload);
+      })
       // reducers for get all Products ______________________
       .addCase(getProducts.pending, (state) => {
         state.isLoading = true;
@@ -100,7 +219,7 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        console.log(action.payload);
+        // console.log(action.payload);
         state.products = action.payload;
       })
       .addCase(getProducts.rejected, (state, action) => {
@@ -108,13 +227,33 @@ const productSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
         toast.error(action.payload);
-      });
+      })
+      // reducers for update product
+      .addCase(updateProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        toast.success("Product updated successfully");
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        toast.error(action.payload);
+      })
   },
 });
 
-export const { CALC_STORE_VALUE } = productSlice.actions;
+export const { CALC_STORE_VALUE, CALC_OUTOFSTOCK, CALC_CATEGORY } =
+  productSlice.actions;
 
 export const selectIsLoading = (state) => state.product.isLoading;
+export const selectProduct = (state) => state.product.product;
 export const selectTotalStoreValue = (state) => state.product.totalStoreValue;
+export const selectOutOfStock = (state) => state.product.outOfStock;
+export const selectCategory = (state) => state.product.category;
 
 export default productSlice.reducer;

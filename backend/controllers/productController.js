@@ -213,8 +213,6 @@ const updateproduct = asyncHandler(async (req, res) => {
     // console.log(fileSizeFormater(req.file.size, 2)) => 4.14 MB
   }
 
-   
-
   // ___________________________
 
   // console.log(userId); // new ObjectId("64c14663869f28fbd4cda015")

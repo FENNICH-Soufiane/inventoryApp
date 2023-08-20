@@ -10,7 +10,7 @@ const filterSlice = createSlice({
   reducers: {
     FILTER_PRODUCTS(state, action) {
       const { products, search } = action.payload;
-      console.log(products)
+      // console.log(products)
       const tempProducts = products.filter(
         (product) =>
           product.name.toLowerCase().includes(search.toLowerCase()) ||

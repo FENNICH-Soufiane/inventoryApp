@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./productSummary.scss";
 import { AiFillDollarCircle } from "react-icons/ai";
 import { BsCart4, BsCartX } from "react-icons/bs";
 import { BiCategory } from "react-icons/bi";
 import InfoBox from "../../infoBox/InfoBox";
+import {
+  CALC_STORE_VALUE,
+  CALC_OUTOFSTOCK,
+  CALC_CATEGORY,
+  selectOutOfStock,
+  selectTotalStoreValue,
+  selectCategory
+} from "../../../redux/features_Slice_Reducer/product/productSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 //Icons
 const earningIcon = <AiFillDollarCircle size={40} color="#fff" />;
@@ -11,7 +20,23 @@ const productIcon = <BsCart4 size={40} color="#fff" />;
 const categoryIcon = <BiCategory size={40} color="#fff" />;
 const outOfStockIcon = <BsCartX size={40} color="#fff" />;
 
+// Format Amount -regex-
+export const formatNumbers = (x) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 const ProductSummary = ({ products }) => {
+  const dispatch = useDispatch();
+  const totalStoreValue = useSelector(selectTotalStoreValue);  
+  const storeValue = useSelector(selectOutOfStock);
+  const category = useSelector(selectCategory);
+  useEffect(() => {
+    dispatch(CALC_STORE_VALUE(products));
+    dispatch(CALC_OUTOFSTOCK(products));
+    dispatch(CALC_CATEGORY(products));
+  }, [dispatch, products]);
+
+  // console.log(totalStoreValue);
   return (
     <div className="product-summary">
       <h3 className="--mt">Inventory Stats</h3>
@@ -25,19 +50,19 @@ const ProductSummary = ({ products }) => {
         <InfoBox
           icon={earningIcon}
           title={"Total Store Value"}
-          count={"0"}
+          count={`$${formatNumbers(totalStoreValue.toFixed(2))}`}
           bgColor="card2"
         />
         <InfoBox
           icon={outOfStockIcon}
           title={"Out of Stock"}
-          count={"0"}
+          count={storeValue}
           bgColor="card3"
         />
         <InfoBox
           icon={categoryIcon}
           title={"All Categories"}
-          count={"0"}
+          count={category}
           bgColor="card4"
         />
       </div>

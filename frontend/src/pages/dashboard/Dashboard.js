@@ -17,7 +17,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (isLoggedIn === true) {
       dispatch(getProducts());
-      console.log(products);
+      // console.log(products);
     }
     if (isError) {
       console.log(message);
