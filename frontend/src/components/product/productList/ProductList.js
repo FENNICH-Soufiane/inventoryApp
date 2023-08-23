@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import "./productList.scss";
 import { SpinnerImg } from "../../loader/Loader";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
@@ -54,12 +54,13 @@ const ProductList = ({ products, isLoading }) => {
 
   // Begin pagination ______________________________
 
-  const itemsPerPage = 2;
+  const itemsPerPage = 12;
   const [itemOffset, setItemOffset] = useState(0);
 
   const endOffset = itemOffset + itemsPerPage;
   const currentItems = filtredProducts.slice(itemOffset, endOffset);
-  const pageCount = Math.ceil(products.length / itemsPerPage);
+  // const pageCount = Math.ceil(products.length / itemsPerPage);
+  const pageCount = Math.ceil(products==="There is no products now" ? 0: products.length / itemsPerPage);
 
   const handlePageClick = (event) => {
     const newOffset = (event.selected * itemsPerPage) % products.length;
@@ -91,7 +92,9 @@ const ProductList = ({ products, isLoading }) => {
         {isLoading && <SpinnerImg />}
 
         <div className="table">
-          {!isLoading && products.length === 0 ? (
+        {/* products==="There is no products now" ? 0: products.length */}
+          {/* {!isLoading && products.length === 0 ? ( */}
+          {!isLoading && products==="There is no products now"  ? (
             <p>-- No product found, please add a product...</p>
           ) : (
             <table>

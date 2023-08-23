@@ -159,42 +159,109 @@ const deleteProductM2 = asyncHandler(async (req, res) => {
 // @desc    Update Product
 // @route
 // @access  Private
-const updateproduct = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user._id;
-  const updateData = req.body;
+// const updateproduct = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+//   const userId = req.user._id;
+//   const updateData = req.body;
 
-  // ___________________________
+//   // ___________________________
+
+//   // Handle Image upload
+//   let fileData = {};
+//   if (req.file) {
+//     const filePath = req.file.path;
+//     const parts = filePath.split("\\");
+//     const filename = parts[parts.length - 1];
+
+//     // Generate a new filename for the compressed image
+//     const compressedFilename = `compressed-${filename}`;
+
+//     // Compress and resize the image
+//     await sharp(req.file.path)
+//       .resize(500, 500) // Resize the image to 500x500 pixels
+//       .jpeg({ quality: 80 }) // Compress the image with the specified quality (adjust as needed)
+//       .toFile(`uploads/${compressedFilename}`); // Save the compressed and resized image to the specified path
+
+//     // Get the file size of the compressed image
+//     const stats = fs.statSync(`uploads/${compressedFilename}`);
+//     const fileSizeInBytes = stats.size;
+//     const fileSizeFormatted = fileSizeFormater(fileSizeInBytes, 2);
+
+//     let uploadedFile;
+
+//     try {
+//       // Upload the compressed image to Cloudinary
+//       uploadedFile = await cloudinary.uploader.upload(
+//         `uploads/${compressedFilename}`,
+//         { folder: "InventoryDashboard", resource_type: "image" }
+//       );
+//     } catch (error) {
+//       res.status(500);
+//       throw new Error("Image could not be uploaded");
+//     }
+
+//     fileData = {
+//       fileName: req.file.originalname,
+//       // filePath: `uploads/${compressedFilename}`, // Use the new compressed image path
+//       filePath: uploadedFile.secure_url,
+//       fileType: req.file.mimetype,
+//       fileSize: fileSizeFormatted,
+//     };
+
+//     console.log(req.file); // Juste pour voir le rendu du req.file
+//     // console.log(req.file.size) => 4141057
+//     // console.log(fileSizeFormater(req.file.size, 2)) => 4.14 MB
+//   }
+
+//   // ___________________________
+
+//   // console.log(userId); // new ObjectId("64c14663869f28fbd4cda015")
+//   // console.log(req.user.id); // 64c14663869f28fbd4cda015
+//   const updateProduct = await Product.findByIdAndUpdate(id, updateData, {
+//     new: true,
+//     runValidators: true, // Run model validations on the update
+//   });
+
+//   if (userId.toString() !== updateProduct.user.toString()) {
+//     res.status(401);
+//     throw new Error("You are not authorized to perform this task");
+//   }
+
+//   if (!updateProduct) {
+//     res.status(404);
+//     throw new Error(`There is no product for this id : ${id}`);
+//   }
+
+//   res.status(200).send(updateProduct);
+// });
+
+const updateproduct = asyncHandler(async (req, res) => {
+  const { name, category, quantity, price, description } = req.body;
+  const { id } = req.params;
+
+  const product = await Product.findById(id);
+
+  // if product doesnt exist
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+  // Match product to its user
+  if (product.user.toString() !== req.user.id) {
+    res.status(401);
+    throw new Error("User not authorized");
+  }
 
   // Handle Image upload
   let fileData = {};
   if (req.file) {
-    const filePath = req.file.path;
-    const parts = filePath.split("\\");
-    const filename = parts[parts.length - 1];
-
-    // Generate a new filename for the compressed image
-    const compressedFilename = `compressed-${filename}`;
-
-    // Compress and resize the image
-    await sharp(req.file.path)
-      .resize(500, 500) // Resize the image to 500x500 pixels
-      .jpeg({ quality: 80 }) // Compress the image with the specified quality (adjust as needed)
-      .toFile(`uploads/${compressedFilename}`); // Save the compressed and resized image to the specified path
-
-    // Get the file size of the compressed image
-    const stats = fs.statSync(`uploads/${compressedFilename}`);
-    const fileSizeInBytes = stats.size;
-    const fileSizeFormatted = fileSizeFormater(fileSizeInBytes, 2);
-
+    // Save image to cloudinary
     let uploadedFile;
-
     try {
-      // Upload the compressed image to Cloudinary
-      uploadedFile = await cloudinary.uploader.upload(
-        `uploads/${compressedFilename}`,
-        { folder: "InventoryDashboard", resource_type: "image" }
-      );
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Pinvent App",
+        resource_type: "image",
+      });
     } catch (error) {
       res.status(500);
       throw new Error("Image could not be uploaded");
@@ -202,37 +269,30 @@ const updateproduct = asyncHandler(async (req, res) => {
 
     fileData = {
       fileName: req.file.originalname,
-      // filePath: `uploads/${compressedFilename}`, // Use the new compressed image path
       filePath: uploadedFile.secure_url,
       fileType: req.file.mimetype,
-      fileSize: fileSizeFormatted,
+      fileSize: fileSizeFormater(req.file.size, 2),
     };
-
-    console.log(req.file); // Juste pour voir le rendu du req.file
-    // console.log(req.file.size) => 4141057
-    // console.log(fileSizeFormater(req.file.size, 2)) => 4.14 MB
   }
 
-  // ___________________________
+  // Update Product
+  const updatedProduct = await Product.findByIdAndUpdate(
+    { _id: id },
+    {
+      name,
+      category,
+      quantity,
+      price,
+      description,
+      image: Object.keys(fileData).length === 0 ? product?.image : fileData,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
-  // console.log(userId); // new ObjectId("64c14663869f28fbd4cda015")
-  // console.log(req.user.id); // 64c14663869f28fbd4cda015
-  const updateProduct = await Product.findByIdAndUpdate(id, updateData, {
-    new: true,
-    runValidators: true, // Run model validations on the update
-  });
-
-  if (userId.toString() !== updateProduct.user.toString()) {
-    res.status(401);
-    throw new Error("You are not authorized to perform this task");
-  }
-
-  if (!updateProduct) {
-    res.status(404);
-    throw new Error(`There is no product for this id : ${id}`);
-  }
-
-  res.status(200).send(updateProduct);
+  res.status(200).json(updatedProduct);
 });
 
 module.exports = {

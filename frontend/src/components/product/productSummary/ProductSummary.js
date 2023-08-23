@@ -14,29 +14,30 @@ import {
 } from "../../../redux/features_Slice_Reducer/product/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-//Icons
+// Icons
 const earningIcon = <AiFillDollarCircle size={40} color="#fff" />;
 const productIcon = <BsCart4 size={40} color="#fff" />;
 const categoryIcon = <BiCategory size={40} color="#fff" />;
 const outOfStockIcon = <BsCartX size={40} color="#fff" />;
 
-// Format Amount -regex-
+// Format Amount
 export const formatNumbers = (x) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 const ProductSummary = ({ products }) => {
   const dispatch = useDispatch();
-  const totalStoreValue = useSelector(selectTotalStoreValue);  
-  const storeValue = useSelector(selectOutOfStock);
+  const totalStoreValue = useSelector(selectTotalStoreValue);
+  const outOfStock = useSelector(selectOutOfStock);
   const category = useSelector(selectCategory);
+
   useEffect(() => {
     dispatch(CALC_STORE_VALUE(products));
     dispatch(CALC_OUTOFSTOCK(products));
     dispatch(CALC_CATEGORY(products));
   }, [dispatch, products]);
+  
 
-  // console.log(totalStoreValue);
   return (
     <div className="product-summary">
       <h3 className="--mt">Inventory Stats</h3>
@@ -44,19 +45,19 @@ const ProductSummary = ({ products }) => {
         <InfoBox
           icon={productIcon}
           title={"Total Products"}
-          count={products.length}
+          count={products==="There is no products now" ? 0: products.length}
           bgColor="card1"
         />
         <InfoBox
           icon={earningIcon}
           title={"Total Store Value"}
-          count={`$${formatNumbers(totalStoreValue.toFixed(2))}`}
+          count={`$${formatNumbers(totalStoreValue.toFixed(2))}  `}
           bgColor="card2"
         />
         <InfoBox
           icon={outOfStockIcon}
           title={"Out of Stock"}
-          count={storeValue}
+          count={outOfStock}
           bgColor="card3"
         />
         <InfoBox

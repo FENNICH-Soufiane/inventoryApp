@@ -71,8 +71,6 @@ export const deleteProducts = createAsyncThunk(
   }
 );
 
-
-
 // Get a product (action)
 export const getProduct = createAsyncThunk(
   "products/getProduct",
@@ -95,7 +93,7 @@ export const getProduct = createAsyncThunk(
 // Update Product (action)
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({id, formData}, thunkAPI) => {
+  async ({ id, formData }, thunkAPI) => {
     try {
       return await productService.updateProduct_(id, formData);
     } catch (error) {
@@ -118,42 +116,69 @@ const productSlice = createSlice({
     // il s'agit d'une action
     CALC_STORE_VALUE(state, action) {
       const products = action.payload;
-      const array = [];
-      products.map((item) => {
-        const { price, quantity } = item;
-        const productValue = price * quantity;
-        return array.push(productValue);
-      });
-      const totalValue = array.reduce((a, b) => {
-        return a + b;
-      }, 0);
-      state.totalStoreValue = totalValue;
+      if (Array.isArray(products)) {
+        const array = [];
+        products.map((item) => {
+          const { price, quantity } = item;
+          const productValue = price * quantity;
+          return array.push(productValue);
+        });
+        const totalValue = array.reduce((a, b) => {
+          return a + b;
+        }, 0);
+        state.totalStoreValue = totalValue;
+      } else {
+        state.totalStoreValue = 0;
+      }
     },
     CALC_OUTOFSTOCK(state, action) {
+      // const products = action.payload;
+      // if (Array.isArray(products)) {
+      //   const array = [];
+      //   products.map((item) => {
+      //     const { quantity } = item;
+      //     array.push(quantity);
+      //   });
+      //   // eslint-disable-next-line no-unused-vars
+      //   let count = 0;
+      //   array.forEach((number) => {
+      //     if (number === 0 || number === "0") {
+      //       count += 1;
+      //     }
+      //   });
+      //   state.outOfStock = count;
+      // } else {
+      //   state.outOfStock = 0;
+      // }
       const products = action.payload;
-      const array = [];
-      products.map((item) => {
+
+      if (!Array.isArray(products)) {
+        state.outOfStock = 0;
+        return;
+      }
+
+      const outOfStockCount = products.reduce((count, item) => {
         const { quantity } = item;
-        array.push(quantity);
-      });
-      // eslint-disable-next-line no-unused-vars
-      let count = 0;
-      array.forEach((number) => {
-        if (number === 0 || number === "0") {
-          count += 1;
-        }
-      });
-      state.outOfStock = count;
+        return count + (quantity === 0 || quantity === "0" ? 1 : 0);
+      }, 0);
+
+      state.outOfStock = outOfStockCount;
     },
     CALC_CATEGORY(state, action) {
       const products = action.payload;
-      const array = [];
-      products.map((item) => {
-        const { category } = item;
-        return array.push(category);
-      });
-      const uniqueCategory = [...new Set(array)];
-      state.category = uniqueCategory.length;
+
+      if (Array.isArray(products)) {
+        const array = [];
+        products.map((item) => {
+          const { category } = item;
+          return array.push(category);
+        });
+        const uniqueCategory = [...new Set(array)];
+
+        state.category = uniqueCategory.length;
+      } else {
+        state.category = 0;
+      }
     },
   },
   // il s'agit d'un reducer
@@ -168,7 +193,10 @@ const productSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         console.log(action.payload);
-        state.products.push(action.payload);
+        if (Array.isArray(action.payload)) {
+          state.products.push(action.payload);
+        }
+        // state.products.push(action.payload);
         toast.success("Product added successfully");
       })
       .addCase(createProduct.rejected, (state, action) => {
@@ -177,7 +205,7 @@ const productSlice = createSlice({
         state.message = action.payload;
         toast.error(action.payload);
       })
-      
+
       // reducers for delete product
       .addCase(deleteProducts.pending, (state) => {
         state.isLoading = true;
@@ -194,7 +222,7 @@ const productSlice = createSlice({
         state.message = action.payload;
         toast.error(action.payload);
       })
-      
+
       // reducers for Get product
       .addCase(getProduct.pending, (state) => {
         state.isLoading = true;
@@ -203,7 +231,7 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        state.product = action.payload;
+        state.product = action.payload;// action.payload response returned of the request
       })
       .addCase(getProduct.rejected, (state, action) => {
         state.isLoading = false;
@@ -219,7 +247,7 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        // console.log(action.payload);
+        console.log(action.payload);
         state.products = action.payload;
       })
       .addCase(getProducts.rejected, (state, action) => {
@@ -243,7 +271,7 @@ const productSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
         toast.error(action.payload);
-      })
+      });
   },
 });
 

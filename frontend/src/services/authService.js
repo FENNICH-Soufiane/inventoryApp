@@ -119,3 +119,20 @@ export const getLoginStatus = async (userData) => {
     toast.error(message);
   }
 };
+
+// Get Login User Data
+export const getUser = async (userData) => {
+  try {
+    const response = await axios.get(`${backend_url}/api/users/getuser`);
+    // console.log(response.data);
+    return response.data
+  } catch (error) {
+    console.log(error);
+    const message =
+      (error.response && error.response.data && error.response.data.message) ||
+      error.message ||
+      error.toString();
+
+    toast.error(message);
+  }
+};
