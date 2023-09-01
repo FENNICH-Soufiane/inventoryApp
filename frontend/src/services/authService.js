@@ -121,10 +121,27 @@ export const getLoginStatus = async (userData) => {
 };
 
 // Get Login User Data
-export const getUser = async (userData) => {
+export const getUser = async () => {
   try {
     const response = await axios.get(`${backend_url}/api/users/getuser`);
     // console.log(response.data);
+    return response.data
+  } catch (error) {
+    console.log(error);
+    const message =
+      (error.response && error.response.data && error.response.data.message) ||
+      error.message ||
+      error.toString();
+
+    toast.error(message);
+  }
+};
+
+// Change Password
+export const changePassword = async (formData) => {
+  try {
+    const response = await axios.put(`${backend_url}/api/users/changepasswordMethodOne`, formData);
+    console.log(response.data);
     return response.data
   } catch (error) {
     console.log(error);
